@@ -103,9 +103,42 @@ const imageClick = (e) => {
 
   const selectImg = () => {
     counter = 0;
-    for (let i = 0; i < galleryItems.length; i++){
+    for (let i = 0; i < galleryItems.length; i++) {
       counter += 1;
-      if (currentImg.includes(galleryItems[i].original))
+      if (currentImg.includes(galleryItems[i].original)) {
+        counter -= 1;
+        return counter;
+      }
     }
   }
+};
+
+selectImg();
+if (e.target.nodeName === "IMG") {
+  refs.lightboxContainer.classList.add("is-open");
+  refs.lightboxImages.setAttribute("src", `${currentImg}`);
+  refs.lightboxImages.setAttribute("alt", `${currentAlt}`);
+
 }
+
+refs.galleryList.addEventListener("click", imageClick);
+
+const closeLightbox = (e) => {
+  if (
+    e.target.nodeName === "BUTTON" &&
+    e.target.dataset.action === "close-lightbox"
+  ) {
+    closeContainer();
+  }
+  if (e.target.nodeName === "DIV") {
+    closeContainer();
+  }
+};
+
+refs.closeLightBox.addEventListener("click", closeLightbox);
+
+const closeContainer = () => {
+  refs.lightboxContainer.classList.remove("is-open");
+  refs.lightboxImages.setAttribute("src", "");
+  refs.lightboxImages.setAttribute("alt", "");
+};
