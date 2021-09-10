@@ -66,68 +66,82 @@ const galleryItems = [
 
 
 const refs = {
-  gallery: document.querySelector(".js-gallery"),
-  image: document.createElement("img"),
-  lightbox: document.querySelector(".lightbox"),
-  btn: document.querySelector('[data-action="close-lightbox"]'),
-  modal: document.querySelector(".lightbox__content"),
-  lightbox__image: document.querySelector(".lightbox__image"),
+  galleryContainer: document.querySelector(".js-gallery"),
+  lightboxContainer: document.querySelector(".js-lightbox"),
+  imgLightbox: document.querySelector("img.lightbox__image"),
+  closeLightBoxContainer: document.querySelector(
+    `[data-action = "close-lightbox"]`
+  ),
+  boxOverlay: document.querySelector("div.lightbox__overlay"),
 };
 
-const createGalleryItem = ({ preview, original, description }) =>
-  `<li class="gallery__item">
-<a
-  class="gallery__link"
-  href=${original}
->
-  <img
-    class="gallery__image"
-    src=${preview}
-    data-source=${original}
-    alt=${description}
-  />
-</a>
+let counter = 0;
+
+const imagesListTemplate = ({ preview, original, description }) => {
+  return `<li class="gallery__item">
+  <a
+    class="gallery__link"
+    href="${original}"
+  >
+    <img
+      class="gallery__image"
+      src="${preview}"
+      data-source="${original}"
+      alt="${description}"
+    />
+  </a>
 </li>`;
-const galleryMarkup = galleryItems.reduce(
-  (acc, item) => acc + createGalleryItem(item),
-  ""
-);
-refs.gallery.insertAdjacentHTML("afterbegin", galleryMarkup);
-refs.image.classList.add("gallery__image");
+};
 
-refs.gallery.addEventListener("click", onGalleryClick);
-refs.btn.addEventListener("click", onClickHandlerClose);
-refs.modal.addEventListener("click", closeLightbox);
+const addImg = galleryItems.map(imagesListTemplate).join("");
 
-function onGalleryClick(e) {
-  e.preventDefault();
-  if (e.target.nodeName !== 'IMG') {
-    return;
+refs.galleryContainer.insertAdjacentHTML("afterbegin", addImg);
+
+const galleryClick = (event) => {
+  event.preventDefault();
+
+  const currentImg = event.target.dataset.source;
+  const currentAlt = event.target.alt;
+  
+
+  const findImgNavPosotion = () => {
+    counter = 0;
+    for (let i = 0; i < galleryItems.length; i++) {
+      counter += 1;
+      if (currentImg.includes(galleryItems[i].original)) {
+        counter -= 1;
+        return counter;
+      }
+    }
+  };
+  findImgNavPosotion();
+
+  if (event.target.nodeName === "IMG") {
+    refs.lightboxContainer.classList.add("is-open");
+    refs.imgLightbox.setAttribute("src", `${currentImg}`);
+    refs.imgLightbox.setAttribute("alt", `${currentAlt}`);
   }
-  if (e.target.nodeName === "IMG") {
-    refs.lightbox.classList.add("is-open");
-    refs.lightbox__image.src = e.target.getAttribute("data-source");
-    refs.lightbox__image.alt = e.target.alt;
-  }
-  window.addEventListener("keyup", clickKey);
-}
+};
+refs.galleryContainer.addEventListener("click", galleryClick);
 
-function onClickHandlerClose(e) {
-  e.preventDefault(); 
-  refs.lightbox.classList.remove("is-open");
-  refs.lightbox__image.src = '';
-  refs.lightbox__image.alt = '';
-  window.removeEventListener("keyup", clickKey);
-}
-
-function closeLightbox(event) {
-  if (event.target === event.currentTarget) {
-    onClickHandlerClose();
+const closeLightBox = (event) => {
+  if (
+    event.target.nodeName === "BUTTON" &&
+    event.target.dataset.action === "close-lightbox"
+  ) {
+    closeContainer();
   }
-}
-
-function clickKey(event) {
-  if (event.code === "Escape") {
-    onClickHandlerClose();
+  if (event.target.nodeName === "DIV") {
+    closeContainer();
   }
-}
+};
+
+refs.closeLightBoxContainer.addEventListener("click", closeLightBox);
+refs.boxOverlay.addEventListener("click", closeLightBox);
+
+const closeContainer = () => {
+  refs.lightboxContainer.classList.remove("is-open");
+  refs.imgLightbox.setAttribute("src", "");
+  refs.imgLightbox.setAttribute("alt", "");
+};
+
