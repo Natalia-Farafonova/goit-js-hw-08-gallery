@@ -145,3 +145,34 @@ const closeContainer = () => {
   refs.imgLightbox.setAttribute("alt", "");
 };
 
+const pressKeyLightBox = (event) => {
+  if (refs.lightboxContainer.classList.contains("is-open")) {
+    if (event.code === "Escape") {
+      closeContainer();
+    }
+    if (event.code === "ArrowRight") {
+      counter += 1;
+      if (counter === galleryImages.length) {
+        counter = 0;
+      }
+
+      currentGalleryImages();
+    }
+
+    if (event.code === "ArrowLeft") {
+      counter -= 1;
+      if (counter === -1) {
+        counter = 8;
+      }
+      currentGalleryImages();
+    }
+  }
+};
+
+const currentGalleryImages = () => {
+  refs.imgLightbox.setAttribute("src", `${galleryImages[counter].original}`);
+  refs.imgLightbox.setAttribute("alt", `${galleryImages[counter].description}`);
+};
+
+const pressKey = window.addEventListener("keyup", pressKeyLightBox);
+
